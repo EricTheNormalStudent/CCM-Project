@@ -106,7 +106,10 @@ class MCTS:
             if not node.is_terminal() and node.untried_actions:
                 node = node.expand()
 
-            value = self.rollout(node.state.clone(), node.player_to_move)
+            value = self.rollout(
+                node.state.clone(),
+                self.leaf_evaluation_player(node),
+            )
             self.backpropagate(node, value)
 
         visit_counts = {action: child.visits for action, child in root.children.items()}
@@ -122,6 +125,20 @@ class MCTS:
             "visit_counts": visit_counts,
             "action_probs": action_probs,
         }
+
+    def leaf_evaluation_player(self, node: Node) -> Optional[str]:
+        """Return the perspective that leaf evaluation should use."""
+        if not node.is_terminal():
+            return node.player_to_move
+
+        if node.parent is None:
+            return node.player_to_move
+
+        agents = node.state.possible_agents
+        parent_player = node.parent.player_to_move
+        parent_index = agents.index(parent_player)
+        next_index = (parent_index + 1) % len(agents)
+        return agents[next_index]
 
     def rollout(self, state: Connect4Env, rollout_player: Optional[str]) -> float:
         if rollout_player is None:
