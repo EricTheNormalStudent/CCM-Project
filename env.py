@@ -174,8 +174,7 @@ class Connect4Env(AECEnv):
         self._accumulate_rewards()
 
         # switch player
-        if not all(self.terminations.values()):
-            self.agent_selection = self._agent_selector.next()
+        self.agent_selection = self._agent_selector.next()
 
         if self.render_mode == "human":
             self.render()
